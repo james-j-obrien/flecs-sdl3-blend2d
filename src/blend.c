@@ -1,4 +1,5 @@
 #include "blend.h"
+
 #include "sdl.h"
 
 ECS_COMPONENT_DECLARE(Circle);
@@ -68,13 +69,13 @@ void BlendRenderStart(ecs_iter_t *it) {
 
   blContextBegin(&renderer->ctx, &renderer->img, NULL);
   blContextClearAll(&renderer->ctx);
-
-  blContextFillAllRgba32(&renderer->ctx, 0x10000000u);
 }
 
 void BlendRenderEnd(ecs_iter_t *it) {
   Renderer *renderer = (Renderer *)ecs_field(it, Renderer, 0);
   App *app = (App *)ecs_field(it, App, 1);
+
+  blContextEnd(&renderer->ctx);
 
   BLImageData data;
   blImageGetData(&renderer->img, &data);
