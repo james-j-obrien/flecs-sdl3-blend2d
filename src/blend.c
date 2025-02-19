@@ -43,37 +43,8 @@ void BlendStartup(ecs_iter_t *it) {
     return;
   };
 
-  size_t size;
-  void *file = SDL_LoadFile("assets/Roboto.ttf", &size);
-  if (!file) {
-    SDL_Log("Couldn't load font");
-    app->status = SDL_APP_FAILURE;
-    return;
-  }
-
-  BLArrayCore bytes;
-  if (blArrayInit(&bytes, BL_OBJECT_TYPE_ARRAY_UINT8) != BL_SUCCESS) {
-    SDL_Log("Failed to create byte array");
-    app->status = SDL_APP_FAILURE;
-    return;
-  }
-
-  if (blArrayAppendData(&bytes, file, size) != BL_SUCCESS) {
-    SDL_Log("Failed to append data to byte array");
-    app->status = SDL_APP_FAILURE;
-    return;
-  }
-
-  BLFontDataCore data;
-  blFontDataInit(&data);
-  if (blFontDataCreateFromDataArray(&data, &bytes) != BL_SUCCESS) {
-    SDL_Log("Failed to create font data");
-    app->status = SDL_APP_FAILURE;
-    return;
-  }
-
   blFontFaceInit(&face);
-  if (blFontFaceCreateFromData(&face, &data, 0) != BL_SUCCESS) {
+  if (blFontFaceCreateFromFile(&face, "assets/Roboto.ttf", 0) != BL_SUCCESS) {
     SDL_Log("Couldn't create font face");
     app->status = SDL_APP_FAILURE;
     return;
@@ -85,10 +56,6 @@ void BlendStartup(ecs_iter_t *it) {
     app->status = SDL_APP_FAILURE;
     return;
   }
-
-  blFontDataDestroy(&data);
-  blArrayDestroy(&bytes);
-  SDL_free(file);
 
   BLContextCore ctx;
   blContextInit(&ctx);
