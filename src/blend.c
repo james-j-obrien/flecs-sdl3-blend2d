@@ -17,7 +17,7 @@ typedef struct {
 
 void BlendStartup(ecs_iter_t *it) {
   ecs_world_t *world = it->world;
-  App *app = ecs_get_mut(world, ecs_id(App), App);
+  App *app = (App *)ecs_singleton_get(world, App);
 
   SDL_Texture *texture = NULL;
 
@@ -93,12 +93,12 @@ void BlendStartup(ecs_iter_t *it) {
   BLContextCore ctx;
   blContextInit(&ctx);
 
-  ecs_set(world, ecs_id(Renderer), Renderer, {texture, img, face, font, ctx});
+  ecs_singleton_set(world, Renderer, {texture, img, face, font, ctx});
 }
 
 void BlendRenderStart(ecs_iter_t *it) {
   ecs_world_t *world = it->world;
-  Renderer *renderer = ecs_get_mut(world, ecs_id(Renderer), Renderer);
+  Renderer *renderer = (Renderer *)ecs_singleton_get(world, Renderer);
   App *app = ecs_get_mut(world, ecs_id(App), App);
 
   SDL_SetRenderDrawColor(app->renderer, 0, 0, 0,
