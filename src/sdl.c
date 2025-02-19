@@ -3,11 +3,10 @@
 ECS_COMPONENT_DECLARE(App);
 
 void SdlStartup(ecs_iter_t *it) {
-  ecs_world_t *world = it->world;
   SDL_Window *window = NULL;
   SDL_Renderer *renderer = NULL;
 
-  App *app = (App *)ecs_singleton_get(world, App);
+  App *app = (App *)ecs_field(it, App, 0);
 
   SDL_SetAppMetadata("flecs-sdl3-blend2d", "1.0",
                      "com.example.flecs-sdl3-blend2d");
@@ -25,7 +24,18 @@ void SdlStartup(ecs_iter_t *it) {
     return;
   }
 
-  ecs_singleton_set(world, App, {window, renderer, SDL_APP_CONTINUE});
+  ecs_singleton_set(it->world, App, {window, renderer, SDL_APP_CONTINUE});
+}
+
+void SdlRenderStart(ecs_iter_t *it) {
+  App *app = (App *)ecs_field(it, App, 0);
+  SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+  SDL_RenderClear(app->renderer);
+}
+
+void SdlRenderEnd(ecs_iter_t *it) {
+  App *app = (App *)ecs_field(it, App, 0);
+  SDL_RenderPresent(app->renderer);
 }
 
 void SdlImport(ecs_world_t *world) {
@@ -34,5 +44,7 @@ void SdlImport(ecs_world_t *world) {
   ECS_COMPONENT_DEFINE(world, App);
   ecs_singleton_set(world, App, {.status = SDL_APP_CONTINUE});
 
-  ECS_SYSTEM(world, SdlStartup, EcsOnStart);
+  ECS_SYSTEM(world, SdlStartup, EcsOnStart, App($));
+  ECS_SYSTEM(world, SdlRenderStart, EcsOnUpdate, App($));
+  ECS_SYSTEM(world, SdlRenderEnd, EcsPostFrame, App($));
 }

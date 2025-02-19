@@ -17,7 +17,7 @@ typedef struct {
 
 void BlendStartup(ecs_iter_t *it) {
   ecs_world_t *world = it->world;
-  App *app = (App *)ecs_singleton_get(world, App);
+  App *app = (App *)ecs_field(it, App, 0);
 
   SDL_Texture *texture = NULL;
 
@@ -97,13 +97,7 @@ void BlendStartup(ecs_iter_t *it) {
 }
 
 void BlendRenderStart(ecs_iter_t *it) {
-  ecs_world_t *world = it->world;
-  Renderer *renderer = (Renderer *)ecs_singleton_get(world, Renderer);
-  App *app = ecs_get_mut(world, ecs_id(App), App);
-
-  SDL_SetRenderDrawColor(app->renderer, 0, 0, 0,
-                         SDL_ALPHA_OPAQUE); /* black, full alpha */
-  SDL_RenderClear(app->renderer);           /* start with a blank canvas. */
+  Renderer *renderer = (Renderer *)ecs_field(it, Renderer, 0);
 
   blContextBegin(&renderer->ctx, &renderer->img, NULL);
   blContextClearAll(&renderer->ctx);
@@ -112,9 +106,8 @@ void BlendRenderStart(ecs_iter_t *it) {
 }
 
 void BlendRenderEnd(ecs_iter_t *it) {
-  ecs_world_t *world = it->world;
-  Renderer *renderer = (Renderer *)ecs_singleton_get(world, Renderer);
-  App *app = (App *)ecs_singleton_get(world, App);
+  Renderer *renderer = (Renderer *)ecs_field(it, Renderer, 0);
+  App *app = (App *)ecs_field(it, App, 1);
 
   BLImageData data;
   blImageGetData(&renderer->img, &data);
@@ -123,14 +116,12 @@ void BlendRenderEnd(ecs_iter_t *it) {
   SDL_RenderTexture(app->renderer, renderer->texture, NULL, NULL);
 
   blContextReset(&renderer->ctx);
-
-  SDL_RenderPresent(app->renderer);
 }
 
 void RenderCircle(ecs_iter_t *it) {
-  Renderer *renderer = (Renderer *)ecs_singleton_get(it->world, Renderer);
-  const Shape *shape = ecs_field(it, Shape, 0);
-  const Circle *circle = ecs_field(it, Circle, 1);
+  Renderer *renderer = (Renderer *)ecs_field(it, Renderer, 0);
+  const Shape *shape = ecs_field(it, Shape, 1);
+  const Circle *circle = ecs_field(it, Circle, 2);
 
   for (int i = 0; i < it->count; i++) {
     BLCircle obj = {shape[i].x + shape[i].offset_x,
@@ -141,9 +132,9 @@ void RenderCircle(ecs_iter_t *it) {
 }
 
 void RenderText(ecs_iter_t *it) {
-  Renderer *renderer = (Renderer *)ecs_singleton_get(it->world, Renderer);
-  const Shape *shape = ecs_field(it, Shape, 0);
-  const Text *text = ecs_field(it, Text, 1);
+  Renderer *renderer = (Renderer *)ecs_field(it, Renderer, 0);
+  const Shape *shape = ecs_field(it, Shape, 1);
+  const Text *text = ecs_field(it, Text, 2);
 
   for (int i = 0; i < it->count; i++) {
     BLPoint point = {shape[i].x + shape[i].offset_x,
@@ -161,9 +152,9 @@ void BlendImport(ecs_world_t *world) {
   ECS_COMPONENT_DEFINE(world, Shape);
   ECS_COMPONENT_DEFINE(world, Renderer);
 
-  ECS_SYSTEM(world, BlendStartup, EcsOnStart);
-  ECS_SYSTEM(world, BlendRenderStart, EcsPostUpdate);
-  ECS_SYSTEM(world, RenderCircle, EcsPreStore, Shape, Circle);
-  ECS_SYSTEM(world, RenderText, EcsPreStore, Shape, Text);
-  ECS_SYSTEM(world, BlendRenderEnd, EcsOnStore);
+  ECS_SYSTEM(world, BlendStartup, EcsOnStart, sdl.App($));
+  ECS_SYSTEM(world, BlendRenderStart, EcsPostUpdate, Renderer($));
+  ECS_SYSTEM(world, RenderCircle, EcsPreStore, Renderer($), Shape, Circle);
+  ECS_SYSTEM(world, RenderText, EcsPreStore, Renderer($), Shape, Text);
+  ECS_SYSTEM(world, BlendRenderEnd, EcsOnStore, Renderer($));
 }
