@@ -54,14 +54,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 
 SDL_AppResult SDL_AppIterate(void *appstate) {
   ecs_world_t *world = appstate;
-  const App *app = ecs_get(world, ecs_id(App), App);
+  const App *app = ecs_singleton_get(world, App);
   if (app->status != SDL_APP_CONTINUE) {
     return app->status;
   }
 
   ecs_progress(world, 0);
 
-  app = ecs_get(world, ecs_id(App), App);
+  app = ecs_singleton_get(world, App);
   return app->status;
 }
 
