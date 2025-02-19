@@ -36,7 +36,6 @@ void BlendStartup(ecs_iter_t *it) {
     return;
   }
   SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_NONE);
-
   if (blImageInitAs(&img, WINDOW_WIDTH, WINDOW_HEIGHT, BL_FORMAT_PRGB32) !=
       BL_SUCCESS) {
     SDL_Log("Couldn't create blend2d image");
@@ -92,8 +91,7 @@ void RenderCircle(ecs_iter_t *it) {
   const Circle *circle = ecs_field(it, Circle, 2);
 
   for (int i = 0; i < it->count; i++) {
-    BLCircle obj = {shape[i].x + shape[i].offset_x,
-                    shape[i].y + shape[i].offset_y, circle[i].radius};
+    BLCircle obj = {shape[i].x, shape[i].y, circle[i].radius};
     blContextFillGeometryRgba32(&renderer->ctx, BL_GEOMETRY_TYPE_CIRCLE, &obj,
                                 shape[i].color);
   }
@@ -105,8 +103,7 @@ void RenderText(ecs_iter_t *it) {
   const Text *text = ecs_field(it, Text, 2);
 
   for (int i = 0; i < it->count; i++) {
-    BLPoint point = {shape[i].x + shape[i].offset_x,
-                     shape[i].y + shape[i].offset_y};
+    BLPoint point = {shape[i].x, shape[i].y};
     blContextFillUtf8TextDRgba32(&renderer->ctx, &point, &renderer->font,
                                  text[i].chars, SIZE_MAX, shape[i].color);
   }

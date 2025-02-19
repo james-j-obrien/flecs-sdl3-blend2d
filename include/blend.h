@@ -15,7 +15,6 @@ typedef struct {
 
 typedef struct {
   double x, y;
-  double offset_x, offset_y;
   uint32_t color;
 } Shape;
 

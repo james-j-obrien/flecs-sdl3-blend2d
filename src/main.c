@@ -12,13 +12,20 @@
 #include "flecs.h"
 #include "sdl.h"
 
+typedef struct {
+  double offset;
+} Moving;
+
+ECS_COMPONENT_DECLARE(Moving);
+
 void Move(ecs_iter_t *it) {
   Shape *shape = (Shape *)ecs_field(it, Shape, 0);
+  const Moving *moving = ecs_field(it, Moving, 1);
   Uint64 ticks = SDL_GetTicks();
-  double offset = sin(ticks / 500.0f) * 100 + 40;
 
   for (int i = 0; i < it->count; i++) {
-    shape[i].offset_y = offset;
+    double offset = sin((ticks + moving[i].offset) / 500.0f) * 50 + 60;
+    shape[i].y = WINDOW_HEIGHT / 2 + offset;
   }
 }
 
@@ -29,17 +36,24 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   ECS_IMPORT(world, Sdl);
   ECS_IMPORT(world, Blend);
 
-  ecs_entity_t circle = ecs_entity(world, {.name = "White Circle"});
-  ecs_set(world, circle, Circle, {50.0});
-  ecs_set(world, circle, Shape,
-          {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 0, 0, 0xFFFFFFFFu});
+  ECS_COMPONENT_DEFINE(world, Moving);
 
-  ecs_entity_t text = ecs_entity(world, {.name = "Blue Text"});
+  uint32_t colors[5] = {0x78FF78FF, 0xFF7878FF, 0xFFFF7800, 0x78FFFF00,
+                        0xFF78FF00};
+  for (int i = 0; i < 5; i++) {
+    ecs_entity_t circle = ecs_new(world);
+    ecs_set(world, circle, Circle, {50.0});
+    ecs_set(world, circle, Shape,
+            {WINDOW_WIDTH / 2 + ((i - 2) * 110), WINDOW_HEIGHT / 2, colors[i]});
+    ecs_set(world, circle, Moving, {i * 200});
+  }
+
+  ecs_entity_t text = ecs_new(world);
   ecs_set(world, text, Text, {"Hello world!"});
   ecs_set(world, text, Shape,
-          {WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 4, 0, 0, 0xFFBBBB00u});
+          {WINDOW_WIDTH / 2 - 110, WINDOW_HEIGHT / 4, 0xFFEEEE00u});
 
-  ECS_SYSTEM(world, Move, EcsOnUpdate, blend.Shape);
+  ECS_SYSTEM(world, Move, EcsOnUpdate, blend.Shape, Moving);
 
   return SDL_APP_CONTINUE;
 }
