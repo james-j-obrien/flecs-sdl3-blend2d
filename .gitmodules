@@ -4,3 +4,6 @@
 [submodule "vendored/blend2d"]
 	path = vendored/blend2d
 	url = https://github.com/blend2d/blend2d.git
+[submodule "vendored/asmjit"]
+	path = vendored/asmjit
+	url = https://github.com/asmjit/asmjit.git
