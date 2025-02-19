@@ -24,7 +24,7 @@ set(SDL_STATIC TRUE)
 
 # Create your game executable target as usual
 add_executable(demo WIN32 src/main.c src/blend.c src/sdl.c src/flecs.c)
-set_target_properties(demo PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_LIST_DIR}/assets/Roboto.ttf@assets/Roboto.ttf -s ALLOW_MEMORY_GROWTH=1 -s STACK_SIZE=1mb")
+set_target_properties(demo PROPERTIES LINK_FLAGS "--preload-file ${CMAKE_CURRENT_LIST_DIR}/assets@assets -s ALLOW_MEMORY_GROWTH=1 -s STACK_SIZE=1mb")
 target_include_directories(demo PRIVATE "${CMAKE_CURRENT_LIST_DIR}/include")
 
 # Link to the actual SDL3 library.
