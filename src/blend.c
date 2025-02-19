@@ -156,5 +156,5 @@ void BlendImport(ecs_world_t *world) {
   ECS_SYSTEM(world, BlendRenderStart, EcsPostUpdate, Renderer($));
   ECS_SYSTEM(world, RenderCircle, EcsPreStore, Renderer($), Shape, Circle);
   ECS_SYSTEM(world, RenderText, EcsPreStore, Renderer($), Shape, Text);
-  ECS_SYSTEM(world, BlendRenderEnd, EcsOnStore, Renderer($));
+  ECS_SYSTEM(world, BlendRenderEnd, EcsOnStore, Renderer($), sdl.App($));
 }
